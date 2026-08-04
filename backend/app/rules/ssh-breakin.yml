@@ -1,0 +1,21 @@
+title: SSH Possible Break-in Attempt
+id: 11111111-1111-4111-8111-111111111102
+status: active
+description: >
+  OpenSSH reported a possible break-in attempt, typically fired after many
+  failed authentication attempts from the same source.
+severity: high
+tags:
+  - authentication
+  - brute-force
+mitre:
+  - tactic: Credential Access
+    technique: T1110
+    technique_name: Brute Force
+logsource:
+  product: linux
+  category: authentication
+detection:
+  condition: single
+  event:
+    event.action: ssh_breakin_attempt

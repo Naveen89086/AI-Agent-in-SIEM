@@ -1,0 +1,209 @@
+# ============================================================================
+# SIEM Platform - Docker Compose (production-like stack)
+# Services: elasticsearch, redis, postgres, backend (API), workers, frontend
+# ============================================================================
+
+name: siem-platform
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: siem-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.license.self_generated.type=basic
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - bootstrap.memory_lock=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+    networks:
+      - siem-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: siem-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - siem-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: siem-postgres
+    environment:
+      - POSTGRES_USER=siem
+      - POSTGRES_PASSWORD=siem
+      - POSTGRES_DB=siem
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siem -d siem"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - siem-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siem-backend
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+psycopg://siem:siem@postgres:5432/siem
+      - EVENT_BUS_URL=redis://redis:6379/0
+      - LOG_STORE_URL=elasticsearch://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=
+      - ELASTICSEARCH_PASSWORD=
+      - ELASTICSEARCH_VERIFY_TLS=false
+      - REDIS_URL=redis://redis:6379/1
+      - CORS_ORIGINS=["http://localhost:8080"]
+      - AI_PROVIDER=${AI_PROVIDER:-heuristic}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-a-long-random-string}
+      - FIRST_ADMIN_USERNAME=${FIRST_ADMIN_USERNAME:-admin}
+      - FIRST_ADMIN_PASSWORD=${FIRST_ADMIN_PASSWORD:-Admin@12345}
+      - FIRST_ADMIN_EMAIL=${FIRST_ADMIN_EMAIL:-admin@localhost}
+      - SOAR_ALLOW_DESTRUCTIVE=${SOAR_ALLOW_DESTRUCTIVE:-false}
+      - SOAR_WEBHOOK_DEFAULT_URL=${SOAR_WEBHOOK_DEFAULT_URL:-}
+      - SOAR_ENDPOINT_ISOLATION_API=${SOAR_ENDPOINT_ISOLATION_API:-}
+      - SOAR_FIREWALL_BLOCK_API=${SOAR_FIREWALL_BLOCK_API:-}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    networks:
+      - siem-net
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siem-worker
+    command: ["python", "-m", "app.workers.pipeline_worker"]
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+psycopg://siem:siem@postgres:5432/siem
+      - EVENT_BUS_URL=redis://redis:6379/0
+      - LOG_STORE_URL=elasticsearch://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=
+      - ELASTICSEARCH_PASSWORD=
+      - ELASTICSEARCH_VERIFY_TLS=false
+      - REDIS_URL=redis://redis:6379/1
+      - AI_PROVIDER=${AI_PROVIDER:-heuristic}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-a-long-random-string}
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./data:/app/data
+    networks:
+      - siem-net
+
+  alert-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siem-alert-worker
+    command: ["python", "-m", "app.workers.alert_worker"]
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+psycopg://siem:siem@postgres:5432/siem
+      - EVENT_BUS_URL=redis://redis:6379/0
+      - LOG_STORE_URL=elasticsearch://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=
+      - ELASTICSEARCH_PASSWORD=
+      - ELASTICSEARCH_VERIFY_TLS=false
+      - REDIS_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-a-long-random-string}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - ALERT_WEBHOOK_DEFAULT_URL=${ALERT_WEBHOOK_DEFAULT_URL:-}
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./data:/app/data
+    networks:
+      - siem-net
+
+  retention-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siem-retention-worker
+    command: ["python", "-m", "app.workers.retention_worker"]
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+psycopg://siem:siem@postgres:5432/siem
+      - EVENT_BUS_URL=redis://redis:6379/0
+      - LOG_STORE_URL=elasticsearch://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=
+      - ELASTICSEARCH_PASSWORD=
+      - ELASTICSEARCH_VERIFY_TLS=false
+      - REDIS_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-a-long-random-string}
+      - RETENTION_DELETE_DAYS=${RETENTION_DELETE_DAYS:-180}
+      - RETENTION_HOT_DAYS=${RETENTION_HOT_DAYS:-7}
+      - RETENTION_WARM_DAYS=${RETENTION_WARM_DAYS:-30}
+      - RETENTION_COLD_DAYS=${RETENTION_COLD_DAYS:-90}
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./data:/app/data
+    networks:
+      - siem-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: siem-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    networks:
+      - siem-net
+
+volumes:
+  es-data:
+  redis-data:
+  pg-data:
+
+networks:
+  siem-net:
+    driver: bridge

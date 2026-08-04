@@ -1,0 +1,29 @@
+title: Windows Mass Logon Failures
+id: 11111111-1111-4111-8111-111111111103
+status: active
+description: >
+  A burst of Windows Security logon failures (4625) from a single source IP,
+  consistent with password spraying or brute force against domain accounts.
+severity: high
+tags:
+  - authentication
+  - brute-force
+  - windows
+mitre:
+  - tactic: Credential Access
+    technique: T1110
+    technique_name: Brute Force
+  - tactic: Credential Access
+    technique: T1110.003
+    technique_name: Password Spraying
+logsource:
+  product: windows
+  category: authentication
+detection:
+  condition: threshold
+  event:
+    event.action: logon_failure
+    event.outcome: failure
+  group_by: source.ip
+  threshold: 10
+  timeframe: 5m
