@@ -11,6 +11,8 @@ import RulesPage from "./pages/RulesPage";
 import SourcesPage from "./pages/SourcesPage";
 import SoarPage from "./pages/SoarPage";
 import ReportsPage from "./pages/ReportsPage";
+import EndpointPage from "./pages/EndpointPage";
+import ModuleDetailPage from "./pages/ModuleDetailPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
@@ -21,6 +23,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/sources": "Data Sources",
   "/soar": "SOAR Automation",
   "/reports": "Reports",
+  "/endpoint": "Endpoint Security — Configuration",
+  "/endpoint/config": "Configuration Assessment",
+  "/endpoint/malware": "Malware Detection",
+  "/endpoint/fim": "File Integrity Monitoring",
+  "/endpoint/process": "Process Monitoring",
+  "/endpoint/registry": "Registry Monitoring",
+  "/endpoint/usb": "USB Monitoring",
 };
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -108,6 +117,26 @@ export default function App() {
           <RequireAuth>
             <Shell>
               <ReportsPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint"
+        element={
+          <RequireAuth>
+            <Shell>
+              <EndpointPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/:moduleId"
+        element={
+          <RequireAuth>
+            <Shell>
+              <ModuleDetailPage />
             </Shell>
           </RequireAuth>
         }
