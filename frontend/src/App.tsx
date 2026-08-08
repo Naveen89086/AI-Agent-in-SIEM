@@ -13,6 +13,8 @@ import SoarPage from "./pages/SoarPage";
 import ReportsPage from "./pages/ReportsPage";
 import EndpointPage from "./pages/EndpointPage";
 import ModuleDetailPage from "./pages/ModuleDetailPage";
+import ConfigurationAssessmentPage from "./pages/ConfigurationAssessmentPage";
+import FileIntegrityMonitoringPage from "./pages/FileIntegrityMonitoringPage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
@@ -127,6 +129,26 @@ export default function App() {
           <RequireAuth>
             <Shell>
               <EndpointPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/config"
+        element={
+          <RequireAuth>
+            <Shell>
+              <ConfigurationAssessmentPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/fim"
+        element={
+          <RequireAuth>
+            <Shell>
+              <FileIntegrityMonitoringPage />
             </Shell>
           </RequireAuth>
         }

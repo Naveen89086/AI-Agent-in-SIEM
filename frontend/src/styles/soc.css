@@ -942,6 +942,261 @@
   flex-shrink: 0;
 }
 
+/* ---- Agents summary ------------------------------------------------------ */
+.soc-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 2px;
+}
+
+.soc-agent-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.soc-agent-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.soc-agent-dot.active {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.soc-agent-dot.disconnected {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+}
+
+.soc-agent-value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+.soc-agent-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+.soc-agent-system {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.soc-agent-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.soc-agent-os {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.soc-agent-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.soc-agent-code {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.soc-agent-state {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.soc-agent-state.active {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.soc-agent-state.disconnected {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+}
+
+/* ---- Last 24h severity grid ---------------------------------------------- */
+.soc-sev-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.soc-sev-cell {
+  border-left: 3px solid var(--border);
+  padding: 2px 0 2px 12px;
+}
+
+.soc-sev-value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.soc-sev-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-top: 6px;
+  text-transform: capitalize;
+}
+
+.soc-sev-caption {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+/* ---- Module rows panel (Endpoint Security / Threat Intel) ---------------- */
+.soc-module-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.soc-module-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 13px 4px;
+  cursor: pointer;
+  font: inherit;
+  width: 100%;
+}
+
+.soc-module-row:last-child {
+  border-bottom: none;
+}
+
+.soc-module-row:hover .soc-module-row-name {
+  color: var(--accent);
+}
+
+.soc-module-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+}
+
+.soc-module-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.soc-module-row-name {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--text);
+  transition: color 0.15s ease;
+}
+
+.soc-module-row-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.soc-module-row-arrow {
+  color: var(--text-faint);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ---- Security operations grid -------------------------------------------- */
+.soc-secops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.soc-secops-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  text-align: left;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  width: 100%;
+}
+
+.soc-secops-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.soc-secops-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+}
+
+.soc-secops-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.soc-secops-name {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.soc-secops-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
 /* ---- Breadcrumb & back link ---------------------------------------------- */
 .soc-breadcrumb {
   display: flex;
@@ -1244,6 +1499,10 @@
   .soc-heatmap-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .soc-sev-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1251,6 +1510,10 @@
   .soc-grid-4,
   .soc-grid-7 {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .soc-secops-grid {
+    grid-template-columns: 1fr;
   }
 
   .soc-hero {
@@ -1290,7 +1553,917 @@
     grid-template-columns: 1fr;
   }
 
+  .soc-sev-grid {
+    grid-template-columns: 1fr;
+  }
+
   .soc-heatmap-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ==========================================================================
+   Configuration Assessment (CIS benchmark dashboard)
+   ========================================================================== */
+
+.cfg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cfg-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.cfg-breadcrumb-link {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.cfg-breadcrumb-current {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.cfg-beam-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.cfg-beam-chip .cfg-beam-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.cfg-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.cfg-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.cfg-tab:hover {
+  color: var(--text);
+}
+
+.cfg-tab-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.cfg-cols {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.cfg-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cfg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.cfg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+}
+
+.cfg-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---- Donut ---- */
+.cfg-donut-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.cfg-donut {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.cfg-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cfg-donut-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.cfg-donut-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.cfg-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.cfg-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.cfg-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cfg-legend-name {
+  color: var(--muted);
+  flex: 1;
+}
+
+.cfg-legend-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---- Policy list ---- */
+.cfg-policy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.cfg-policy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.cfg-policy:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.cfg-policy-active {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.cfg-policy-name {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.cfg-policy-foot {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ---- Benchmark header + summary ---- */
+.cfg-bench {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cfg-summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.cfg-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.cfg-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.cfg-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.cfg-stat-ok {
+  color: #22c55e;
+}
+
+.cfg-stat-err {
+  color: #ef4444;
+}
+
+.cfg-stat-muted {
+  color: #64748b;
+}
+
+.cfg-stat-date {
+  font-size: 13px;
+  font-weight: 500;
+  padding-top: 5px;
+}
+
+/* ---- Checks table ---- */
+.cfg-checks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.cfg-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  background: var(--bg);
+  color: var(--muted);
+  min-width: 220px;
+}
+
+.cfg-search-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 13px;
+  width: 100%;
+}
+
+.cfg-table-wrap {
+  overflow-x: auto;
+}
+
+.cfg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cfg-table th {
+  text-align: left;
+  padding: 9px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.cfg-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.cfg-table tbody tr {
+  transition: background 0.12s ease;
+}
+
+.cfg-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.cfg-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cfg-th-id,
+.cfg-td-id {
+  width: 72px;
+}
+
+.cfg-td-title {
+  min-width: 260px;
+}
+
+.cfg-td-target {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cfg-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cfg-result-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.cfg-result-passed {
+  color: #22c55e;
+}
+
+.cfg-result-passed .cfg-result-dot {
+  background: #22c55e;
+}
+
+.cfg-result-failed {
+  color: #ef4444;
+}
+
+.cfg-result-failed .cfg-result-dot {
+  background: #ef4444;
+}
+
+.cfg-result-not_applicable {
+  color: #64748b;
+}
+
+.cfg-result-not_applicable .cfg-result-dot {
+  background: #64748b;
+}
+
+/* ---- Pagination ---- */
+.cfg-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.cfg-pager-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cfg-pager-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cfg-pager-select {
+  width: auto;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.cfg-pager-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cfg-pager-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cfg-page-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.cfg-page-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.cfg-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cfg-page-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.cfg-page-ellipsis {
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cfg-inv-passed {
+  color: #22c55e;
+}
+
+.cfg-inv-failed {
+  color: #ef4444;
+}
+
+.cfg-inv-na {
+  color: #64748b;
+}
+
+@media (max-width: 1100px) {
+  .cfg-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .cfg-side {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .cfg-side .cfg-card {
+    flex: 1;
+  }
+
+  .cfg-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cfg-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cfg-side {
+    flex-direction: column;
+  }
+
+  .cfg-donut {
+    width: 190px;
+    height: 190px;
+  }
+
+  .cfg-pager {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---- SCA page: shared tokens (cfg section relies on these) ---- */
+.soc-dash {
+  --muted: #64748b;
+  --card: var(--bg-card);
+}
+
+/* ---- Layout helpers ---- */
+.cfg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cfg-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cfg-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cfg-card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.cfg-checks-card {
+  min-width: 0;
+}
+
+.cfg-results-card {
+  min-width: 0;
+}
+
+.cfg-results-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---- Demo badge ---- */
+.cfg-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffb547;
+  background: rgba(255, 181, 71, 0.12);
+  border: 1px solid rgba(255, 181, 71, 0.35);
+  white-space: nowrap;
+}
+
+/* ---- Link button ---- */
+.cfg-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.cfg-link:hover {
+  text-decoration: underline;
+}
+
+/* ---- Selected row ---- */
+.cfg-table tbody tr.cfg-row-active {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.cfg-table tbody tr.cfg-row-active:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ---- Run scan form ---- */
+.cfg-run {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cfg-run-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cfg-run-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cfg-run-select {
+  min-width: 240px;
+}
+
+/* ---- Inline action buttons ---- */
+.cfg-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cfg-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.cfg-action-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.cfg-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cfg-action-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.cfg-action-primary:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.cfg-action-danger {
+  color: var(--red);
+  border-color: color-mix(in srgb, var(--red) 40%, transparent);
+}
+
+.cfg-action-danger:hover:not(:disabled) {
+  border-color: var(--red);
+}
+
+/* ---- Status / severity pill ---- */
+.cfg-sev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.cfg-sev-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cfg-sev-ok {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.cfg-sev-warn {
+  color: #ffb547;
+  background: rgba(255, 181, 71, 0.12);
+  border: 1px solid rgba(255, 181, 71, 0.3);
+}
+
+.cfg-sev-crit {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ---- Result error tone ---- */
+.cfg-result-error {
+  color: #ef4444;
+}
+
+.cfg-result-error .cfg-result-dot {
+  background: #ef4444;
+}
+
+/* ---- Transition pill pair ---- */
+.cfg-transition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+/* ---- Top failing checks ---- */
+.cfg-topfail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cfg-topfail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cfg-topfail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cfg-topfail-title {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.cfg-topfail-count {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.cfg-topfail-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  overflow: hidden;
+}
+
+.cfg-topfail-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #ef4444;
+}
+
+/* ---- Risk distribution ---- */
+.cfg-risk {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cfg-risk-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cfg-risk-label {
+  width: 64px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cfg-risk-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  overflow: hidden;
+}
+
+.cfg-risk-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.cfg-risk-value {
+  width: 34px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* ---- Inline message ---- */
+.cfg-msg {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.cfg-msg-ok {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.cfg-msg-err {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ---- AI analysis panel ---- */
+.cfg-analysis {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+}
+
+.cfg-analysis-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.cfg-analysis-provider {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cfg-analysis-summary {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.cfg-analysis-extra {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+  white-space: pre-wrap;
+}
+
+.cfg-analysis-actions {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 900px) {
+  .cfg-grid-2 {
+    grid-template-columns: 1fr;
   }
 }

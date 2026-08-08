@@ -15,6 +15,20 @@ import type {
   TimelineEntry,
   TopItem,
 } from "./types";
+import type { FimSummary, FimTimelinePoint } from "../mocks/fim";
+import type { BenchmarkSummary, ConfigChecksResult } from "../mocks/soc";
+import type {
+  ScaAgent,
+  ScaAnalysis,
+  ScaDashboard,
+  ScaDriftsResult,
+  ScaEventsResult,
+  ScaRemediation,
+  ScaRemediationsResult,
+  ScaResultsResult,
+  ScaScan,
+  ScaScansResult,
+} from "../mocks/soc";
 
 const TOKEN_KEY = "siem_token";
 
@@ -199,4 +213,137 @@ export const api = {
   retentionStatus: () =>
     request<Record<string, unknown>>("/api/v1/retention/status"),
   retentionRun: () => request<Record<string, unknown>>("/api/v1/retention/run", { method: "POST" }),
+
+  // FIM (syscheck)
+  fimAgents: () => request<{
+    code: string;
+    name: string;
+    platform: string;
+    os_name: string;
+    status: string;
+    registry_entries: number;
+    agent_id: string;
+    hostname: string | null;
+    ip_address: string | null;
+    version: string | null;
+    last_seen: string | null;
+    enabled: boolean;
+    demo: boolean;
+  }[]>("/api/v1/fim/agents"),
+  fimSummary: (agentCode = "001") =>
+    request<FimSummary>(`/api/v1/fim/summary?agent_code=${agentCode}`),
+  fimTimeline: (hours = 24, bucketMinutes = 30, agentCode = "001") =>
+    request<{ interval_minutes: number; points: FimTimelinePoint[] }>(
+      `/api/v1/fim/timeline?hours=${hours}&bucket_minutes=${bucketMinutes}&agent_code=${agentCode}`
+    ),
+  fimFiles: (search = "", agentCode = "001") =>
+    request<{
+      file: string;
+      last_modified: string;
+      user: string;
+      user_id: string;
+      size: number;
+      sha256: string | null;
+      owner: string | null;
+      permissions: string | null;
+      file_type: string | null;
+      status: string | null;
+      first_seen: string | null;
+      last_seen: string | null;
+      demo: boolean;
+    }[]>(`/api/v1/fim/files?agent_code=${agentCode}${search ? `&search=${encodeURIComponent(search)}` : ""}`),
+  fimEvents: (params: { page?: number; perPage?: number; search?: string; agentCode?: string } = {}) => {
+    const qs = new URLSearchParams({
+      page: String(params.page ?? 1),
+      per_page: String(params.perPage ?? 15),
+      agent_code: params.agentCode ?? "001",
+    });
+    if (params.search) qs.set("search", params.search);
+    return request<{
+      items: {
+        timestamp: string;
+        agent: string;
+        path: string;
+        event: string;
+        event_type: string | null;
+        rule: string;
+        level: number;
+        rule_id: number;
+        sha256: string | null;
+        new_sha256: string | null;
+        old_sha256: string | null;
+        old_path: string | null;
+        severity: string | null;
+        size: number | null;
+        source: string | null;
+        evidence: string | null;
+        demo: boolean;
+      }[];
+      total: number;
+      page: number;
+      perPage: number;
+      totalPages: number;
+    }>(`/api/v1/fim/events?${qs}`);
+  },
+
+  // Configuration Assessment (CIS benchmark)
+  policies: () =>
+    request<{ id: string; slug: string; name: string; rows_per_page: number }[]>("/api/v1/policies"),
+  policySummary: (policyId: string, agentCode = "001") =>
+    request<BenchmarkSummary>(`/api/v1/policies/${policyId}/summary?agent_code=${agentCode}`),
+  policyChecks: (policyId: string, params: { page?: number; perPage?: number; search?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 10) });
+    if (params.search) qs.set("search", params.search);
+    return request<ConfigChecksResult>(`/api/v1/policies/${policyId}/checks?${qs}`);
+  },
+
+  // Security Configuration Assessment (SCA)
+  scaDashboard: () => request<ScaDashboard>("/api/v1/sca/dashboard"),
+  scaAgents: () => request<ScaAgent[]>("/api/v1/sca/agents"),
+  scaScans: (params: { page?: number; perPage?: number; agentId?: string; policyId?: string; status?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.policyId) qs.set("policy_id", params.policyId);
+    if (params.status) qs.set("status", params.status);
+    return request<ScaScansResult>(`/api/v1/sca/scans?${qs}`);
+  },
+  scaScanDetail: (scanId: string) => request<ScaScan>(`/api/v1/sca/scans/${scanId}`),
+  scaScanResults: (scanId: string, params: { page?: number; perPage?: number; result?: string; search?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.result) qs.set("result", params.result);
+    if (params.search) qs.set("search", params.search);
+    return request<ScaResultsResult>(`/api/v1/sca/scans/${scanId}/results?${qs}`);
+  },
+  scaCreateScan: (policyId: string, agentId: string) =>
+    request<ScaScan>("/api/v1/sca/scans", { method: "POST", body: JSON.stringify({ policy_id: policyId, agent_id: agentId }) }),
+  scaEvents: (params: { page?: number; perPage?: number; agentId?: string; eventType?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.eventType) qs.set("event_type", params.eventType);
+    return request<ScaEventsResult>(`/api/v1/sca/events?${qs}`);
+  },
+  scaDrifts: (params: { page?: number; perPage?: number; agentId?: string; policyId?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.policyId) qs.set("policy_id", params.policyId);
+    return request<ScaDriftsResult>(`/api/v1/sca/drifts?${qs}`);
+  },
+  scaAnalyses: (checkResultId?: string, limit = 20) =>
+    request<ScaAnalysis[]>(`/api/v1/sca/analyses?limit=${limit}${checkResultId ? `&check_result_id=${checkResultId}` : ""}`),
+  scaAnalyzeCheck: (checkResultId: string, force = false) =>
+    request<ScaAnalysis>(`/api/v1/sca/checks/${checkResultId}/analysis?force=${force}`, { method: "POST", body: JSON.stringify({}) }),
+  scaRemediations: (params: { page?: number; perPage?: number; status?: string; agentId?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.status) qs.set("status", params.status);
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    return request<ScaRemediationsResult>(`/api/v1/sca/remediation?${qs}`);
+  },
+  scaRequestRemediation: (checkResultId: string, description?: string) =>
+    request<ScaRemediation>("/api/v1/sca/remediation", { method: "POST", body: JSON.stringify({ check_result_id: checkResultId, description }) }),
+  scaApproveRemediation: (id: string) =>
+    request<ScaRemediation>(`/api/v1/sca/remediation/${id}/approve`, { method: "POST", body: JSON.stringify({}) }),
+  scaRejectRemediation: (id: string) =>
+    request<ScaRemediation>(`/api/v1/sca/remediation/${id}/reject`, { method: "POST", body: JSON.stringify({}) }),
+  scaExecuteRemediation: (id: string) =>
+    request<ScaRemediation>(`/api/v1/sca/remediation/${id}/execute`, { method: "POST", body: JSON.stringify({}) }),
 };

@@ -1,0 +1,26 @@
+# FIM agent configuration (also overridable via FIM_AGENT_* environment vars).
+# Only the directories listed here are monitored - never a whole drive.
+
+server_url: http://127.0.0.1:8000
+api_prefix: /api/v1
+agent_code: fim-win-001
+# Shared secret used once at registration. If empty, registration falls back
+# to an admin JWT (see FIM_REGISTRATION_TOKEN on the manager).
+registration_token: ""
+
+# Directories to watch recursively. Default is a small dedicated test folder.
+monitored_paths:
+  - C:\FIM-Test
+
+exclude_patterns:
+  - "*.tmp"
+  - "~$*"
+  - "*.swp"
+  - "*.bak"
+
+# Use the watchdog observer when installed; polling still runs as fallback.
+use_watchdog: true
+poll_interval: 5       # seconds between full baseline walks
+heartbeat_interval: 60 # seconds between manager heartbeats
+timeout: 15            # HTTP timeout
+log_level: INFO

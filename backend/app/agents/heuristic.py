@@ -179,6 +179,63 @@ class HeuristicProvider(AgentProvider):
             provider=self.provider_name,
         )
 
+    async def analyze_sca_check(self, context: dict[str, Any]) -> AgentResponse:
+        title = str(context.get("title") or "Configuration check")
+        severity = str(context.get("severity") or "medium").lower()
+        result = str(context.get("result") or "failed").lower()
+        category = str(context.get("category") or "General")
+        check_id = context.get("check_id")
+        policy = str(context.get("policy") or "")
+        agent = str(context.get("agent") or "")
+        remediation = str(context.get("remediation") or "")
+        related = list(context.get("related_findings") or [])
+
+        priority = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}.get(severity, 1)
+        base_risk = {"critical": 9.5, "high": 7.5, "medium": 5.0, "low": 2.5, "info": 1.0}.get(severity, 5.0)
+        risk = base_risk if result == "failed" else min(2.0, base_risk * 0.2)
+
+        narrative = [
+            f"'{title}' ({category}, severity {severity}) failed against {policy} on {agent or 'the monitored system'}.",
+        ]
+        if context.get("actual") is not None or context.get("expected") is not None:
+            narrative.append(
+                f"Expected {context.get('expected') or 'n/a'}, observed {context.get('actual') or 'n/a'}."
+            )
+        impact = {
+            "critical": "The setting is a critical control; exploit is likely to result in full system compromise or data loss.",
+            "high": "The misconfiguration materially increases exposure to credential theft, lateral movement or tampering.",
+            "medium": "The misconfiguration weakens defense-in-depth and should be corrected as soon as practical.",
+            "low": "The finding is low risk but contributes to overall hardening debt.",
+            "info": "Informational finding; review and document.",
+        }.get(severity, "Review the finding against the benchmark guidance.")
+
+        recommended: list[str] = []
+        if remediation:
+            recommended.append(remediation)
+        recommended.append(f"Re-run the {policy} scan after remediation to confirm the check passes.")
+
+        extra: dict[str, Any] = {
+            "priority": priority,
+            "impact": impact,
+            "severity": severity,
+            "result": result,
+            "category": category,
+        }
+        if check_id is not None:
+            extra["check_id"] = check_id
+        if related:
+            extra["related_findings"] = related[:10]
+
+        return AgentResponse(
+            analysis=" ".join(narrative) + " " + impact,
+            summary=f"{title} — {result} ({severity}).",
+            recommended_actions=recommended,
+            risk_score=round(risk, 1),
+            confidence=0.85,
+            provider=self.provider_name,
+            extra=extra,
+        )
+
     async def chat(self, prompt: str, context: dict[str, Any] | None = None) -> str:
         lowered = prompt.lower()
         if context and context.get("alert"):

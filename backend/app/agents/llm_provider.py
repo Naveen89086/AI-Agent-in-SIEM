@@ -33,6 +33,15 @@ _SUMMARIZE_SYSTEM = (
 )
 
 
+_SCA_SYSTEM = (
+    "You are a security configuration analyst. Given a failed configuration "
+    'check (as JSON), return STRICT JSON with keys: "analysis" (string, 3-6 '
+    'sentences), "summary" (string), "recommended_actions" (array of strings), '
+    '"risk_score" (float 0-10), "confidence" (float 0-1), and "priority" '
+    "(integer 0-4). No prose outside the JSON."
+)
+
+
 class LlmProvider(AgentProvider):
     provider_name = "llm"
 
@@ -108,6 +117,12 @@ class LlmProvider(AgentProvider):
             user += "\n\nContext: " + json.dumps(context, default=str)
         data = await self._complete(system, user)
         return str(data.get("analysis") or data.get("summary") or "")
+
+    async def analyze_sca_check(self, context: dict[str, Any]) -> AgentResponse:
+        data = await self._complete(_SCA_SYSTEM, json.dumps(context, default=str))
+        response = self._to_response(data)
+        response.extra["priority"] = data.get("priority")
+        return response
 
     @staticmethod
     def _to_response(data: dict[str, Any]) -> AgentResponse:

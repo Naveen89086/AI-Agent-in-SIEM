@@ -34,6 +34,7 @@ const ICONS: Record<string, LucideIcon> = {
   globe: L.Globe,
   sliders: L.SlidersHorizontal,
   check: L.Check,
+  x: L.X,
   layers: L.Layers,
   download: L.Download,
   octagon: L.OctagonAlert,

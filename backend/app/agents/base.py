@@ -34,5 +34,8 @@ class AgentProvider:
     ) -> AgentResponse:
         raise NotImplementedError
 
+    async def analyze_sca_check(self, context: dict[str, Any]) -> AgentResponse:
+        raise NotImplementedError
+
     async def chat(self, prompt: str, context: dict[str, Any] | None = None) -> str:
         raise NotImplementedError

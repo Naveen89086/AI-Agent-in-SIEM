@@ -107,6 +107,33 @@ class Settings(BaseSettings):
     retention_cold_days: int = 90
     retention_delete_days: int = 180
 
+    # --- File Integrity Monitoring (FIM / syscheck) ---
+    # Demo mode seeds deterministic syscheck data for frontend development.
+    # When disabled, no demo data is generated and events come only from
+    # registered endpoint agents through POST /api/v1/fim/ingest.
+    fim_demo_mode: bool = True
+    # Shared secret an endpoint agent must present to enroll. If unset,
+    # enrollment falls back to an authenticated admin/analyst JWT.
+    fim_registration_token: str | None = None
+    # Optional JSON list overriding the default FIM severity rules.
+    # See app/services/fim_rules.py for the schema.
+    fim_rules_json: str | None = None
+
+    # --- Security Configuration Assessment (SCA) ---
+    # Demo mode seeds deterministic benchmark results for frontend development.
+    # When disabled, scans collect real endpoint evidence through agents.
+    sca_demo_mode: bool = True
+    # "local" runs the engine's collectors on the manager host; "remote"
+    # dispatches scan jobs to registered endpoint agents which submit evidence.
+    sca_agent_mode: str = "local"
+    # Shared secret an endpoint agent must present to register itself. If unset,
+    # registration falls back to an authenticated admin/analyst JWT.
+    sca_registration_token: str | None = None
+    # Max seconds the scan worker waits for an agent to answer a job.
+    sca_agent_timeout_seconds: float = 60.0
+    # Max number of concurrent scan jobs.
+    sca_worker_threads: int = 2
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _parse_cors(cls, value: Any) -> Any:

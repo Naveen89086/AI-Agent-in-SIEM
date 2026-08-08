@@ -58,7 +58,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     with SessionLocal() as db:
         bootstrap_admin(db)
 
+    # Seed the FIM (syscheck) and Configuration Assessment (CIS benchmark)
+    # modules so their dashboards are backed by real data on first boot.
+    from app.services.endpoint_seed import seed_endpoint_data
+
+    with SessionLocal() as db:
+        seed_endpoint_data(db)
+
+    # Start the in-memory SCA scan job queue (replaced by Redis/Celery later).
+    from app.sca.queue import get_scan_queue
+
+    get_scan_queue().start()
+
     yield
+
+    get_scan_queue().stop()
 
 
 app = FastAPI(
@@ -92,7 +106,14 @@ async def security_headers(request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "no-referrer"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https://cdn.jsdelivr.net; "
+        "font-src 'self' data: https://cdn.jsdelivr.net; "
+        "connect-src 'self' https://cdn.jsdelivr.net"
+    )
     return response
 
 

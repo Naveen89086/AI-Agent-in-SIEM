@@ -13,6 +13,7 @@ class Analysis(Base, TimestampMixin, UUIDPrimaryKeyMixin):
 
     kind: Mapped[str] = mapped_column(String(32), default="alert_analysis", nullable=False, index=True)
     alert_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    reference_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     provider: Mapped[str] = mapped_column(String(32), default="heuristic", nullable=False)
     prompt: Mapped[str | None] = mapped_column(String, nullable=True)
     analysis: Mapped[str | None] = mapped_column(String, nullable=True)
