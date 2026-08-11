@@ -29,6 +29,9 @@ class Topics:
     NORMALIZED_EVENTS = "normalized.events"
     DETECTIONS = "detections"
     ALERTS = "alerts"
+    IOC_MATCHES = "ioc.matches"
+    HUNT_MATCHES = "hunt.matches"
+    VULN_SCANS = "vuln.scans"
 
 
 class EventBus(ABC):

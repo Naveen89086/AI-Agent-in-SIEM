@@ -36,6 +36,7 @@ from app.core.exceptions import (
 from app.models.syscheck import SyscheckAgent, SyscheckEvent, SyscheckFile
 from app.schemas.fim import FimIngestRequest
 from app.services import fim_rules
+from app.services.protected_endpoint_service import ProtectedEndpointService
 
 log = logging.getLogger("siem.fim")
 
@@ -114,6 +115,7 @@ class FimService:
         os_name: str = "",
         platform: str = "windows",
         version: str = "1.0.0",
+        machine_guid: str | None = None,
         registration_token: str | None = None,
     ) -> dict:
         if settings.fim_registration_token:
@@ -148,6 +150,7 @@ class FimService:
             last_seen=_now(),
             api_key_hash=_hash_api_key(api_key),
             enabled=True,
+            machine_guid=machine_guid or None,
         )
         self.db.add(agent)
         self.db.commit()
@@ -158,6 +161,7 @@ class FimService:
 
     def heartbeat(self, agent_code: str, api_key: str, status: str = "online") -> dict:
         agent = self._authenticated_agent(agent_code, api_key)
+        ProtectedEndpointService(self.db).validate_ingest_agent(agent)
         agent.status = status if status in ("active", "inactive") else "active"
         agent.last_seen = _now()
         self.db.commit()
@@ -181,6 +185,7 @@ class FimService:
     # --------------------------------------------------------------- ingest
     def ingest(self, agent_code: str, api_key: str, payload: FimIngestRequest) -> dict:
         agent = self._authenticated_agent(agent_code, api_key)
+        ProtectedEndpointService(self.db).validate_ingest_agent(agent)
         agent.last_seen = _now()
 
         # Dedupe: if the agent already delivered this exact event, drop it.

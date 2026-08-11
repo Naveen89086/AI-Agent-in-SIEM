@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.protected_endpoint import ProtectedEndpoint
 from app.models.sca import (
     Agent,
     CheckResult,
@@ -493,6 +494,46 @@ def _make_compliance(policy_check_id: str, policy: Policy, check_id: int) -> lis
 # Syscheck (FIM)
 # ---------------------------------------------------------------------------
 
+def seed_protected_endpoint_demo(db: Session) -> None:
+    """Create the demo protected endpoint (single-device placeholder).
+
+    Demo mode only. Runs before the subsystem seeds so every demo row can be
+    attached to the one protected device. A real agent registration replaces
+    this demo placeholder (never blocks it).
+    """
+    if not any(
+        [
+            settings.fim_demo_mode,
+            settings.sca_demo_mode,
+            settings.network_demo_mode,
+            settings.process_demo_mode,
+            settings.ioc_demo_mode,
+            settings.vulnerability_demo_mode,
+        ]
+    ):
+        return
+    if db.execute(select(ProtectedEndpoint.id).limit(1)).first() is not None:
+        return
+    db.add(
+        ProtectedEndpoint(
+            machine_guid="demo-local-device",
+            hostname="WORKSTATION-01",
+            operating_system="Windows 10 Pro 22H2",
+            os_version="10.0.19045",
+            architecture="AMD64",
+            agent_version="1.0.0",
+            ip_address="10.10.10.21",
+            ip_addresses='["10.10.10.21", "fe80::1111:2222:3333:4444%5"]',
+            mac_addresses='["00:15:5d:01:aa:01"]',
+            status="online",
+            last_seen=_utcnow(),
+            demo=True,
+            registered_at=_utcnow(),
+        )
+    )
+    db.flush()
+
+
 def seed_syscheck(db: Session) -> None:
     """Seed syscheck agents, the file inventory and the event stream (demo mode only)."""
     if not settings.fim_demo_mode:
@@ -503,10 +544,9 @@ def seed_syscheck(db: Session) -> None:
     rng = random.Random(42)
     now = _utcnow()
 
+    # Single-device model: demo data reflects ONE protected endpoint.
     agents = [
         SyscheckAgent(code="001", name="BEAM", platform="windows", os_name="Windows 11 Enterprise", status="active", registry_entries=9699),
-        SyscheckAgent(code="002", name="BEAM", platform="windows", os_name="Windows 11 Enterprise", status="active", registry_entries=9412),
-        SyscheckAgent(code="003", name="BEAM", platform="linux", os_name="Ubuntu 22.04 LTS", status="disconnected", registry_entries=0),
     ]
     db.add_all(agents)
     db.flush()
@@ -956,6 +996,7 @@ def seed_policies(db: Session) -> None:
 
 def seed_endpoint_data(db: Session) -> None:
     """Seed both FIM and SCA modules if empty (demo mode)."""
+    seed_protected_endpoint_demo(db)
     seed_syscheck(db)
     seed_sca_agents(db)
     seed_policies(db)

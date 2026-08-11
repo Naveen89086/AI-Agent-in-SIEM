@@ -346,4 +346,135 @@ export const api = {
     request<ScaRemediation>(`/api/v1/sca/remediation/${id}/reject`, { method: "POST", body: JSON.stringify({}) }),
   scaExecuteRemediation: (id: string) =>
     request<ScaRemediation>(`/api/v1/sca/remediation/${id}/execute`, { method: "POST", body: JSON.stringify({}) }),
+
+  // Threat Intelligence (IOC)
+  iocDashboard: () => request<Record<string, unknown>>("/api/v1/ioc/dashboard"),
+  iocAgents: () => request<Record<string, unknown>[]>("/api/v1/ioc/agents"),
+  iocIndicators: (params: { page?: number; perPage?: number; indicatorType?: string; search?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.indicatorType) qs.set("indicator_type", params.indicatorType);
+    if (params.search) qs.set("search", params.search);
+    return request<Record<string, unknown>>(`/api/v1/ioc/indicators?${qs}`);
+  },
+  iocLookup: (type: string, value: string) =>
+    request<Record<string, unknown>>(
+      `/api/v1/ioc/lookup?type=${encodeURIComponent(type)}&value=${encodeURIComponent(value)}`
+    ),
+  iocMatches: (params: { page?: number; perPage?: number; verdict?: string; agentId?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.verdict) qs.set("verdict", params.verdict);
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    return request<Record<string, unknown>>(`/api/v1/ioc/matches?${qs}`);
+  },
+  iocObservations: (params: { page?: number; perPage?: number; verdict?: string; agentId?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.verdict) qs.set("verdict", params.verdict);
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    return request<Record<string, unknown>>(`/api/v1/ioc/observations?${qs}`);
+  },
+
+  // Threat Hunting
+  huntDefinitions: () => request<Record<string, unknown>[]>("/api/v1/hunting/definitions"),
+  huntDefinition: (huntId: string) => request<Record<string, unknown>>(`/api/v1/hunting/definitions/${huntId}`),
+  huntQueries: (params: { page?: number; perPage?: number; huntId?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.huntId) qs.set("hunt_id", params.huntId);
+    return request<Record<string, unknown>>(`/api/v1/hunting/queries?${qs}`);
+  },
+  huntQueryDetail: (queryId: string) => request<Record<string, unknown>>(`/api/v1/hunting/queries/${queryId}`),
+  huntQueryResults: (queryId: string, params: { page?: number; perPage?: number } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    return request<Record<string, unknown>>(`/api/v1/hunting/queries/${queryId}/results?${qs}`);
+  },
+  huntRun: (huntId: string, params: { timeFrom?: string; timeTo?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.timeFrom) qs.set("time_from", params.timeFrom);
+    if (params.timeTo) qs.set("time_to", params.timeTo);
+    qs.set("limit", String(params.limit ?? 100));
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>>(`/api/v1/hunting/queries/${huntId}/run${suffix}`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+  },
+  huntAnalyze: (queryId: string, force = false) =>
+    request<Record<string, unknown>>(`/api/v1/hunting/queries/${queryId}/analyze?force=${force}`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+
+  // Vulnerability Detection
+  vulnDashboard: () => request<Record<string, unknown>>("/api/v1/vulnerabilities/dashboard"),
+  vulnAgents: () => request<Record<string, unknown>[]>("/api/v1/vulnerabilities/agents"),
+  vulnInventory: (params: { agentId?: string; search?: string; status?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.search) qs.set("search", params.search);
+    if (params.status) qs.set("status", params.status);
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>[]>(`/api/v1/vulnerabilities/inventory${suffix}`);
+  },
+  vulnScans: (params: { page?: number; perPage?: number; agentId?: string; status?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.status) qs.set("status", params.status);
+    return request<Record<string, unknown>>(`/api/v1/vulnerabilities/scans?${qs}`);
+  },
+  vulnScanDetail: (scanId: string) => request<Record<string, unknown>>(`/api/v1/vulnerabilities/scans/${scanId}`),
+  vulnScanFindings: (scanId: string, params: { page?: number; perPage?: number; status?: string } = {}) => {
+    const qs = new URLSearchParams({ page: String(params.page ?? 1), per_page: String(params.perPage ?? 20) });
+    if (params.status) qs.set("status", params.status);
+    return request<Record<string, unknown>>(`/api/v1/vulnerabilities/scans/${scanId}/findings?${qs}`);
+  },
+  vulnRunScan: (agentId: string) =>
+    request<Record<string, unknown>>("/api/v1/vulnerabilities/scans", {
+      method: "POST",
+      body: JSON.stringify({ agent_id: agentId }),
+    }),
+
+  // Network + Process/Service Monitoring (endpoint telemetry)
+  telemetryAgents: () => request<Record<string, unknown>[]>("/api/v1/telemetry/agents"),
+  networkDashboard: () => request<Record<string, unknown>>("/api/v1/network/dashboard"),
+  networkConnections: (params: { agentId?: string; state?: string; search?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.state) qs.set("state", params.state);
+    if (params.search) qs.set("search", params.search);
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>[]>(`/api/v1/network/connections${suffix}`);
+  },
+  networkListening: (params: { agentId?: string; search?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.search) qs.set("search", params.search);
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>[]>(`/api/v1/network/listening${suffix}`);
+  },
+  networkInterfaces: (agentId?: string) =>
+    request<Record<string, unknown>[]>(`/api/v1/network/interfaces${agentId ? `?agent_id=${agentId}` : ""}`),
+  networkStatistics: (agentId?: string) =>
+    request<Record<string, unknown>[]>(`/api/v1/network/statistics${agentId ? `?agent_id=${agentId}` : ""}`),
+  processSummary: () => request<Record<string, unknown>>("/api/v1/processes/summary"),
+  processes: (params: { agentId?: string; search?: string; status?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.search) qs.set("search", params.search);
+    if (params.status) qs.set("status", params.status);
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>[]>(`/api/v1/processes${suffix}`);
+  },
+  processDetail: (pid: number, agentId?: string) =>
+    request<Record<string, unknown>>(`/api/v1/processes/${pid}${agentId ? `?agent_id=${agentId}` : ""}`),
+  processTree: (pid: number, agentId?: string) =>
+    request<Record<string, unknown>[]>(`/api/v1/processes/${pid}/tree${agentId ? `?agent_id=${agentId}` : ""}`),
+  services: (params: { agentId?: string; search?: string; state?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.agentId) qs.set("agent_id", params.agentId);
+    if (params.search) qs.set("search", params.search);
+    if (params.state) qs.set("state", params.state);
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<Record<string, unknown>[]>(`/api/v1/services${suffix}`);
+  },
+  serviceDetail: (name: string, agentId?: string) =>
+    request<Record<string, unknown>>(`/api/v1/services/${encodeURIComponent(name)}${agentId ? `?agent_id=${agentId}` : ""}`),
 };

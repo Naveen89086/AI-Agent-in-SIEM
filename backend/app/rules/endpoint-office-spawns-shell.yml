@@ -1,0 +1,40 @@
+title: Office Document Spawning Shell
+id: 44444444-4444-4444-8444-444444444401
+status: active
+description: >
+  A Microsoft Office application (Word, Excel, PowerPoint, Outlook) spawned a
+  shell (PowerShell, cmd, script host). Office applications are not expected to
+  launch shells; this is a commonly observed execution pattern following a
+  malicious document. Rated as potentially suspicious - an analyst should
+  review the document and the spawned command line.
+severity: high
+tags:
+  - process
+  - execution
+  - office
+  - suspicious
+mitre:
+  - tactic: Execution
+    technique: T1204.002
+    technique_name: User Execution - Malicious File
+  - tactic: Initial Access
+    technique: T1566.001
+    technique_name: Phishing - Spearphishing Attachment
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  condition: single
+  event:
+    event.action: process_created
+    process.name:
+      - powershell.exe
+      - powershell_ise.exe
+      - cmd.exe
+      - cscript.exe
+      - wscript.exe
+    process.parent.name:
+      - winword.exe
+      - excel.exe
+      - powerpnt.exe
+      - outlook.exe

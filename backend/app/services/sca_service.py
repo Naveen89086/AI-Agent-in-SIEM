@@ -79,6 +79,7 @@ class ScaService:
         operating_system: str,
         platform: str,
         version: str,
+        machine_guid: str | None = None,
         registration_token: str | None = None,
     ) -> dict:
         if settings.sca_registration_token:
@@ -109,6 +110,7 @@ class ScaService:
             last_seen=_now(),
             api_key_hash=_hash_api_key(api_key),
             enabled=True,
+            machine_guid=machine_guid or None,
         )
         self.db.add(agent)
         self.db.commit()

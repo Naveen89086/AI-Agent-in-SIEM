@@ -16,6 +16,7 @@ from app.core.exceptions import ForbiddenError, UnauthorizedError, ValidationErr
 from app.core.security import decode_access_token
 from app.models.sca import Agent
 from app.services.auth_service import AuthService
+from app.services.protected_endpoint_service import ProtectedEndpointService
 from app.services.sca_service import ScaService, _hash_api_key
 
 router = APIRouter()
@@ -44,7 +45,8 @@ def _optional_admin(request: Request, db) -> Any:
     return user
 
 
-def _verify_agent_api_key(agent_code: str, api_key: str | None, db) -> None:
+def _verify_agent_api_key(agent_code: str, api_key: str | None, db):
+    """Authenticate an agent API key; returns the agent row."""
     if not api_key:
         raise UnauthorizedError("Missing agent API key", code="invalid_api_key")
     agent = db.execute(select(Agent).where(Agent.agent_code == agent_code)).scalar_one_or_none()
@@ -52,6 +54,7 @@ def _verify_agent_api_key(agent_code: str, api_key: str | None, db) -> None:
         _hash_api_key(api_key), agent.api_key_hash
     ):
         raise UnauthorizedError("Invalid agent API key", code="invalid_api_key")
+    return agent
 
 
 # --------------------------------------------------------------------- agents
@@ -78,12 +81,20 @@ def register_agent(
         agent_code = str(payload["agent_code"])
     except KeyError:
         raise ValidationError("agent_code is required")
+    ProtectedEndpointService(db).ensure_single_endpoint(
+        machine_guid=str(payload.get("machine_guid", "")),
+        hostname=str(payload.get("hostname", "")),
+        operating_system=str(payload.get("operating_system", "")),
+        ip_address=str(payload.get("ip_address", "")),
+        agent_version=str(payload.get("version", "")),
+    )
     return _service(db).register_agent(
         agent_code=agent_code,
         hostname=str(payload.get("hostname", "")),
         operating_system=str(payload.get("operating_system", "")),
         platform=str(payload.get("platform", "windows")),
         version=str(payload.get("version", "1.0.0")),
+        machine_guid=str(payload.get("machine_guid", "")),
         registration_token=reg_token,
     )
 
@@ -95,7 +106,8 @@ def agent_heartbeat(
     db: DbSession,
     x_api_key: str | None = Header(default=None),
 ) -> dict:
-    _verify_agent_api_key(agent_code, x_api_key, db)
+    agent = _verify_agent_api_key(agent_code, x_api_key, db)
+    ProtectedEndpointService(db).validate_ingest_agent(agent)
     return _service(db).heartbeat(
         agent_code,
         api_key=x_api_key or "",
@@ -110,7 +122,8 @@ def agent_jobs(
     x_api_key: str | None = Header(default=None),
 ) -> dict:
     """Return the next evidence-collection job waiting for an endpoint agent."""
-    _verify_agent_api_key(agent_code, x_api_key, db)
+    agent = _verify_agent_api_key(agent_code, x_api_key, db)
+    ProtectedEndpointService(db).validate_ingest_agent(agent)
     return _service(db).pending_job(agent_code)
 
 
@@ -127,7 +140,8 @@ def submit_evidence(
         items = list(payload["items"])
     except KeyError:
         raise ValidationError("agent_code and items are required")
-    _verify_agent_api_key(agent_code, x_api_key, db)
+    agent = _verify_agent_api_key(agent_code, x_api_key, db)
+    ProtectedEndpointService(db).validate_ingest_agent(agent)
     return _service(db).submit_evidence(
         scan_id=scan_id, agent_code=agent_code, items=items
     )

@@ -344,7 +344,8 @@ def test_seed_syscheck_skipped_when_demo_off(monkeypatch):
     with Session() as s:
         seed_syscheck(s)
         s.commit()
-        assert s.execute(select(func.count()).select_from(SyscheckAgent)).scalar() == 3
+        # Single-device model: demo data reflects one protected endpoint.
+        assert s.execute(select(func.count()).select_from(SyscheckAgent)).scalar() == 1
         assert s.execute(select(func.count()).select_from(SyscheckFile)).scalar() == 13
         assert s.execute(select(func.count()).select_from(SyscheckEvent)).scalar() == 977
 

@@ -236,6 +236,80 @@ class HeuristicProvider(AgentProvider):
             extra=extra,
         )
 
+    async def analyze_hunt(self, context: dict[str, Any]) -> AgentResponse:
+        name = str(context.get("name") or "Hunt")
+        hunt_id = context.get("hunt_id")
+        matched = int(context.get("matched_events", 0))
+        mitre_ids = [str(m) for m in (context.get("mitre") or [])]
+        results = list(context.get("results") or [])
+
+        severity = "low"
+        if matched >= 20:
+            severity = "critical"
+        elif matched >= 5:
+            severity = "high"
+        elif matched >= 1:
+            severity = "medium"
+
+        techniques: set[str] = set()
+        for m in mitre_ids:
+            technique = m.split(".")[0]
+            techniques.add(technique)
+            info = _MITRE.get(technique)
+            if info:
+                techniques.add(info[0])
+
+        hosts = sorted({r.get("host") for r in results if r.get("host")})
+        reasons = [r.get("reason") for r in results[:5]]
+
+        narrative = [
+            f"Hunt '{name}' ({hunt_id}) matched {matched} event(s) in the hunting window.",
+        ]
+        if techniques:
+            narrative.append(
+                "It maps to MITRE ATT&CK technique(s): "
+                + ", ".join(sorted(techniques))
+                + "."
+            )
+        if hosts:
+            narrative.append(
+                "Involved host(s): " + ", ".join(hosts[:8]) + "."
+            )
+        if severity in ("high", "critical"):
+            narrative.append(
+                "The match volume is significant; recommend immediate analyst review "
+                "and containment of the involved hosts."
+            )
+
+        recommended: list[str] = []
+        if matched:
+            recommended.append("Open a case for the matched events and pivot to the involved hosts.")
+            recommended.append("Review the underlying normalized events for follow-on activity (lateral movement, C2, persistence).")
+        if techniques:
+            for technique in sorted(techniques):
+                info = _MITRE.get(technique.split(".")[0])
+                if info:
+                    recommended.append(f"[{technique}] {info[1]}")
+
+        return AgentResponse(
+            analysis=" ".join(narrative),
+            summary=f"Hunt '{name}' — {matched} match(es), severity {severity}.",
+            mitre=[
+                {"tactic": "", "technique": m.split(".")[0], "technique_name": _MITRE.get(m.split(".")[0], [""])[0] if _MITRE.get(m.split(".")[0]) else ""}
+                for m in mitre_ids
+            ],
+            recommended_actions=_dedupe(recommended)[:6],
+            risk_score=round({"critical": 9.0, "high": 7.0, "medium": 4.5, "low": 1.5}.get(severity, 2.0), 1),
+            confidence=0.8,
+            provider=self.provider_name,
+            extra={
+                "hunt_id": hunt_id,
+                "matched_events": matched,
+                "hosts": hosts[:20],
+                "sample_reasons": reasons[:5],
+            },
+        )
+
     async def chat(self, prompt: str, context: dict[str, Any] | None = None) -> str:
         lowered = prompt.lower()
         if context and context.get("alert"):

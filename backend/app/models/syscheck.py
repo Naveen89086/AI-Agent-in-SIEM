@@ -37,6 +37,8 @@ class SyscheckAgent(Base, TimestampMixin, UUIDPrimaryKeyMixin):
     api_key_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     last_seen: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Stable machine fingerprint of the protected endpoint this agent belongs to.
+    machine_guid: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
 
     def __repr__(self) -> str:
         return f"<SyscheckAgent {self.name} ({self.code})>"

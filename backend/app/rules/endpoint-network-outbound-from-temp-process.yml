@@ -1,0 +1,34 @@
+title: Outbound Connection from Temp Process
+id: 44444444-4444-4444-8444-444444444403
+status: active
+description: >
+  A process running from a temporary directory opened an outbound network
+  connection. Combining execution from a Temp location with network activity is
+  a frequently observed beaconing/dropper pattern. Rated as potentially
+  suspicious - analysts should correlate the destination with threat
+  intelligence and process history.
+severity: high
+tags:
+  - network
+  - process
+  - temp
+  - suspicious
+mitre:
+  - tactic: Command and Control
+    technique: T1071.001
+    technique_name: Application Layer Protocol - Web Protocols
+  - tactic: Execution
+    technique: T1204.002
+    technique_name: User Execution - Malicious File
+logsource:
+  product: windows
+  category: network_connection
+detection:
+  condition: single
+  event:
+    event.action: connection_new
+    network.direction: outbound
+    process.executable:
+      - '*\temp\*'
+      - '*/tmp/*'
+      - '*/var/tmp/*'

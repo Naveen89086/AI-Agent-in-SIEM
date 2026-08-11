@@ -21,6 +21,7 @@ from app.core.config import settings
 from app.core.exceptions import UnauthorizedError, ValidationError
 from app.schemas.fim import FimIngestRequest
 from app.services.fim_service import FimService
+from app.services.protected_endpoint_service import ProtectedEndpointService
 from app.services.syscheck_service import SyscheckService
 
 router = APIRouter()
@@ -98,6 +99,13 @@ def fim_register_agent(
         agent_code = str(payload["agent_code"])
     except KeyError:
         raise ValidationError("agent_code is required")
+    ProtectedEndpointService(db).ensure_single_endpoint(
+        machine_guid=str(payload.get("machine_guid", "")),
+        hostname=str(payload.get("hostname", "")),
+        operating_system=str(payload.get("os_name", "")),
+        ip_address=str(payload.get("ip_address", "")),
+        agent_version=str(payload.get("version", "")),
+    )
     return FimService(db).register_agent(
         agent_code=agent_code,
         hostname=str(payload.get("hostname", "")),
@@ -105,6 +113,7 @@ def fim_register_agent(
         os_name=str(payload.get("os_name", "")),
         platform=str(payload.get("platform", "windows")),
         version=str(payload.get("version", "1.0.0")),
+        machine_guid=str(payload.get("machine_guid", "")),
         registration_token=reg_token,
     )
 

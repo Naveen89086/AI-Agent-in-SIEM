@@ -41,6 +41,14 @@ _SCA_SYSTEM = (
     "(integer 0-4). No prose outside the JSON."
 )
 
+_HUNT_SYSTEM = (
+    "You are a threat hunter. Given the results of a hunt query against a SIEM "
+    'event store (as JSON), return STRICT JSON with keys: "analysis" (string, '
+    '3-6 sentences), "summary" (string), "mitre" (array of {tactic, technique, '
+    'technique_name}), "recommended_actions" (array of strings), "risk_score" '
+    "(float 0-10), \"confidence\" (float 0-1). No prose outside the JSON."
+)
+
 
 class LlmProvider(AgentProvider):
     provider_name = "llm"
@@ -123,6 +131,10 @@ class LlmProvider(AgentProvider):
         response = self._to_response(data)
         response.extra["priority"] = data.get("priority")
         return response
+
+    async def analyze_hunt(self, context: dict[str, Any]) -> AgentResponse:
+        data = await self._complete(_HUNT_SYSTEM, json.dumps(context, default=str))
+        return self._to_response(data)
 
     @staticmethod
     def _to_response(data: dict[str, Any]) -> AgentResponse:

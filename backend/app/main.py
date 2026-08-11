@@ -65,6 +65,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     with SessionLocal() as db:
         seed_endpoint_data(db)
 
+    # Seed the Threat Intelligence (IOC) and Vulnerability modules (demo mode).
+    from app.services.threat_seed import seed_threat_data
+
+    with SessionLocal() as db:
+        seed_threat_data(db)
+
+    # Seed the Network + Process/Service monitoring modules (demo mode).
+    from app.services.telemetry_seed import seed_telemetry_demo
+
+    with SessionLocal() as db:
+        seed_telemetry_demo(db)
+
     # Start the in-memory SCA scan job queue (replaced by Redis/Celery later).
     from app.sca.queue import get_scan_queue
 

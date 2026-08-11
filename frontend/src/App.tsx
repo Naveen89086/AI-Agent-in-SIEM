@@ -15,6 +15,11 @@ import EndpointPage from "./pages/EndpointPage";
 import ModuleDetailPage from "./pages/ModuleDetailPage";
 import ConfigurationAssessmentPage from "./pages/ConfigurationAssessmentPage";
 import FileIntegrityMonitoringPage from "./pages/FileIntegrityMonitoringPage";
+import IocLookupPage from "./pages/IocLookupPage";
+import ThreatHuntingPage from "./pages/ThreatHuntingPage";
+import VulnerabilityPage from "./pages/VulnerabilityPage";
+import NetworkMonitoringPage from "./pages/NetworkMonitoringPage";
+import ProcessServicePage from "./pages/ProcessServicePage";
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
@@ -29,7 +34,11 @@ const PAGE_TITLES: Record<string, string> = {
   "/endpoint/config": "Configuration Assessment",
   "/endpoint/malware": "Malware Detection",
   "/endpoint/fim": "File Integrity Monitoring",
-  "/endpoint/process": "Process Monitoring",
+  "/endpoint/ioc": "IOC Lookup",
+  "/endpoint/hunting": "Threat Hunting",
+  "/endpoint/vulnerabilities": "Vulnerability Detection",
+  "/endpoint/network": "Network Monitoring",
+  "/endpoint/process": "Process & Service Monitoring",
   "/endpoint/registry": "Registry Monitoring",
   "/endpoint/usb": "USB Monitoring",
 };
@@ -149,6 +158,56 @@ export default function App() {
           <RequireAuth>
             <Shell>
               <FileIntegrityMonitoringPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/ioc"
+        element={
+          <RequireAuth>
+            <Shell>
+              <IocLookupPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/hunting"
+        element={
+          <RequireAuth>
+            <Shell>
+              <ThreatHuntingPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/vulnerabilities"
+        element={
+          <RequireAuth>
+            <Shell>
+              <VulnerabilityPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/network"
+        element={
+          <RequireAuth>
+            <Shell>
+              <NetworkMonitoringPage />
+            </Shell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/endpoint/process"
+        element={
+          <RequireAuth>
+            <Shell>
+              <ProcessServicePage />
             </Shell>
           </RequireAuth>
         }

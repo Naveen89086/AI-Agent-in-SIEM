@@ -6,6 +6,8 @@ import { AuthProvider } from "./auth/AuthContext";
 import "./styles/theme.css";
 import "./styles/soc.css";
 import "./styles/fim.css";
+import "./styles/threat.css";
+import "./styles/endpoint.css";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(

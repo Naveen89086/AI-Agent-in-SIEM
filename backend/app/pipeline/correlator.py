@@ -62,6 +62,11 @@ class Correlator:
             except ValueError:
                 return str(event_value) == expected
         if isinstance(event_value, str) and isinstance(expected, str):
+            if "*" in expected:
+                # fnmatch-style wildcard on values (e.g. "*\Temp\*").
+                import fnmatch
+
+                return fnmatch.fnmatchcase(event_value.lower(), expected.lower())
             return event_value.lower() == expected.lower()
         return event_value == expected
 

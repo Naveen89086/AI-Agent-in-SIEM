@@ -31,6 +31,8 @@ class Agent(Base, TimestampMixin, UUIDPrimaryKeyMixin):
     # Hash of the agent's API key (never stored in plaintext).
     api_key_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
+    # Stable machine fingerprint of the protected endpoint this agent belongs to.
+    machine_guid: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
 
     def __repr__(self) -> str:
         return f"<Agent {self.agent_code} ({self.hostname}) {self.status}>"

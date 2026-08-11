@@ -361,6 +361,92 @@ class FirewallParser(EventParser):
 
 
 # ---------------------------------------------------------------------------
+# Endpoint telemetry (network / process / service transitions from agents)
+# ---------------------------------------------------------------------------
+_ENDPOINT_ACTIONS = {
+    "connection_new": (["network"], ["connection", "start"]),
+    "connection_closed": (["network"], ["connection", "end"]),
+    "listener_added": (["network"], ["connection", "info"]),
+    "listener_removed": (["network"], ["connection", "info"]),
+    "process_created": (["process"], ["start", "process"]),
+    "process_terminated": (["process"], ["end", "process"]),
+    "service_created": (["application"], ["info"]),
+    "service_started": (["application"], ["start"]),
+    "service_stopped": (["application"], ["end"]),
+    "service_deleted": (["application"], ["info"]),
+}
+
+
+class EndpointTelemetryParser(EventParser):
+    id = "endpoint_telemetry"
+
+    def parse(self, raw: dict[str, Any]) -> dict[str, Any] | None:
+        extra = raw.get("extra") or {}
+        action = str(extra.get("event_action") or "").lower()
+        if action not in _ENDPOINT_ACTIONS:
+            return None
+        ecs = new_ecs()
+        categories, types = _ENDPOINT_ACTIONS[action]
+        ecs["event"]["category"] = categories
+        ecs["event"]["type"] = types
+        ecs["event"]["action"] = action
+        ecs["event"]["kind"] = "event"
+        ecs["event"]["module"] = "endpoint-telemetry"
+        ecs["host"] = {"name": raw.get("host")}
+        ecs["labels"] = {"agent_code": extra.get("agent_code")}
+
+        network = extra.get("network") or {}
+        if network:
+            ecs["network"] = {
+                "transport": network.get("transport"),
+                "protocol": network.get("protocol"),
+                "direction": network.get("direction"),
+            }
+        source = extra.get("source") or {}
+        if source:
+            ecs["source"] = {
+                "ip": _ip(str(source.get("ip", ""))) if source.get("ip") else None,
+                "port": source.get("port"),
+            }
+        destination = extra.get("destination") or {}
+        if destination:
+            ecs["destination"] = {
+                "ip": _ip(str(destination.get("ip", ""))) if destination.get("ip") else None,
+                "port": destination.get("port"),
+            }
+        process = extra.get("process") or {}
+        if process:
+            parent = process.get("parent") or {}
+            ecs["process"] = {
+                "name": process.get("name"),
+                "pid": process.get("pid"),
+                "executable": process.get("executable"),
+                "command_line": process.get("command_line"),
+                "parent": {
+                    "pid": parent.get("pid"),
+                    "name": parent.get("name"),
+                },
+            }
+        user = extra.get("user") or {}
+        if user.get("name"):
+            ecs["user"] = {"name": user.get("name")}
+        service = extra.get("service") or {}
+        if service:
+            ecs["service"] = {
+                "name": service.get("name"),
+                "display_name": service.get("display_name"),
+                "state": service.get("state"),
+                "previous_state": service.get("previous_state"),
+                "start_type": service.get("start_type"),
+                "account": service.get("account"),
+            }
+        ecs["@timestamp"] = _ts(raw.get("timestamp") or raw.get("received_at"))
+        ecs["message"] = raw.get("message") or raw.get("raw") or ""
+        ecs["pipeline"] = {"parsed": True, "parser": self.id}
+        return ecs
+
+
+# ---------------------------------------------------------------------------
 # JSON passthrough
 # ---------------------------------------------------------------------------
 class JsonParser(EventParser):
@@ -411,7 +497,15 @@ class SyslogParser(EventParser):
 # ---------------------------------------------------------------------------
 _PARSERS: dict[str, EventParser] = {
     p.id: p()
-    for p in (LinuxAuthParser, WindowsParser, WebServerParser, FirewallParser, JsonParser, SyslogParser)
+    for p in (
+        LinuxAuthParser,
+        WindowsParser,
+        WebServerParser,
+        FirewallParser,
+        EndpointTelemetryParser,
+        JsonParser,
+        SyslogParser,
+    )
 }
 
 # Aliases used by agents / source config
@@ -429,6 +523,7 @@ _PARSER_ALIASES = {
     "win": "windows",
     "sysmon": "windows",
     "json": "json",
+    "endpoint": "endpoint_telemetry",
 }
 
 

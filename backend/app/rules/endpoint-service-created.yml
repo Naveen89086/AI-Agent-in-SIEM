@@ -1,0 +1,24 @@
+title: Windows Service Created
+id: 44444444-4444-4444-8444-444444444404
+status: active
+description: >
+  A new Windows service appeared on an endpoint. Installing a service is a
+  common persistence mechanism (T1543.003). Rated as potentially suspicious -
+  analysts should verify the service name, binary path and account against
+  expected software.
+severity: medium
+tags:
+  - service
+  - persistence
+  - suspicious
+mitre:
+  - tactic: Persistence
+    technique: T1543.003
+    technique_name: Create or Modify System Process - Windows Service
+logsource:
+  product: windows
+  category: service
+detection:
+  condition: single
+  event:
+    event.action: service_created

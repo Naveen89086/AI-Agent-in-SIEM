@@ -1,0 +1,32 @@
+title: Process Launched from Temp Directory
+id: 44444444-4444-4444-8444-444444444402
+status: active
+description: >
+  A new process was created from a temporary directory (Windows Temp, /tmp,
+  /var/tmp). Legitimate applications occasionally run from Temp, but this is a
+  commonly observed pattern for dropped payloads. Rated as potentially
+  suspicious - analysts should verify the process is expected on the endpoint.
+severity: medium
+tags:
+  - process
+  - execution
+  - temp
+  - suspicious
+mitre:
+  - tactic: Execution
+    technique: T1204.002
+    technique_name: User Execution - Malicious File
+  - tactic: Defense Evasion
+    technique: T1036.005
+    technique_name: Masquerading - Match Legitimate Name or Location
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  condition: single
+  event:
+    event.action: process_created
+    process.executable:
+      - '*\temp\*'
+      - '*/tmp/*'
+      - '*/var/tmp/*'
