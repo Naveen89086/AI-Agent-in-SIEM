@@ -89,10 +89,24 @@ async function withFallbackDemo<T>(primary: () => Promise<T>, fallback: () => Pr
       value !== null && typeof value === "object" && "demo" in value
         ? Boolean((value as { demo?: unknown }).demo)
         : false;
-    return { ...value, demo };
+    return withDemo(value, demo);
   } catch {
-    return { ...(await fallback()), demo: true };
+    return withDemo(await fallback(), true);
   }
+}
+
+/**
+ * Attach the `demo` flag without destroying the payload shape. Array payloads
+ * (e.g. scaAgents) must stay arrays so consumers can still call `.map`.
+ */
+function withDemo<T>(value: T, demo: boolean): WithDemo<T> {
+  if (Array.isArray(value)) {
+    return Object.assign([], value, { demo }) as WithDemo<T>;
+  }
+  if (value !== null && typeof value === "object") {
+    return { ...(value as Record<string, unknown>), demo } as WithDemo<T>;
+  }
+  return { demo } as WithDemo<T>;
 }
 
 /** Resolve the CIS Windows 11 benchmark policy by slug (falls back to the first policy). */

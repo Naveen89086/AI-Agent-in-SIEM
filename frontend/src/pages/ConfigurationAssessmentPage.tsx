@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Icon } from "../components/icons";
 import { useAsync } from "../hooks/useAsync";
+import type { AsyncState } from "../hooks/useAsync";
 import { pageWindow } from "../utils/pagination";
 import {
   benchmarkSummary,
@@ -593,13 +594,21 @@ function DashboardTab({ dashboard }: { dashboard: WithDemo<ScaDashboard> | null 
   );
 }
 
-function InventoryTab({ data }: { data: WithDemo<ScaAgent[]> | null }) {
+function InventoryTab({ agents }: { agents: AsyncState<WithDemo<ScaAgent[]> | null> }) {
+  const data = agents.data ?? null;
   return (
     <div className="cfg-card">
       <div className="cfg-card-title">
         Agent Inventory
         <DemoBadge demo={data?.demo ?? false} />
       </div>
+      {agents.status === "loading" ? (
+        <StateRow status="loading" error={null} />
+      ) : agents.status === "error" ? (
+        <StateRow status="error" error={agents.error} />
+      ) : !data || data.length === 0 ? (
+        <StateRow status="success" error={null} empty="No agents registered" icon="box" />
+      ) : (
       <div className="cfg-table-wrap">
         <table className="cfg-table">
           <thead>
@@ -615,7 +624,7 @@ function InventoryTab({ data }: { data: WithDemo<ScaAgent[]> | null }) {
             </tr>
           </thead>
           <tbody>
-            {(data ?? []).map((a) => (
+            {data.map((a) => (
               <tr key={a.id}>
                 <td className="mono">{a.agent_code}</td>
                 <td className="cfg-td-title">{a.hostname}</td>
@@ -632,6 +641,7 @@ function InventoryTab({ data }: { data: WithDemo<ScaAgent[]> | null }) {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
@@ -734,7 +744,7 @@ function EventsTab({ events, drifts }: { events: WithDemo<ScaEventsResult> | nul
 function PoliciesTab({
   agents,
 }: {
-  agents: WithDemo<ScaAgent[]> | null;
+  agents: AsyncState<WithDemo<ScaAgent[]> | null>;
 }) {
   const policies = useAsync(() => configPolicies(), [], 60_000);
   const [selected, setSelected] = useState<string>("");
@@ -742,10 +752,12 @@ function PoliciesTab({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const agentRows = agents.data ?? [];
+
   useEffect(() => {
-    const online = (agents ?? []).find((a) => a.status === "online");
+    const online = agentRows.find((a) => a.status === "online");
     if (online) setAgentId((prev) => prev || online.id);
-  }, [agents]);
+  }, [agentRows]);
 
   const runScan = async () => {
     if (!selected || !agentId) return;
@@ -825,8 +837,14 @@ function PoliciesTab({
           <label className="cfg-run-field">
             <span className="cfg-run-label">Agent</span>
             <select className="select cfg-run-select" value={agentId} onChange={(e) => setAgentId(e.target.value)}>
-              <option value="">Select an agent…</option>
-              {(agents ?? []).map((a) => (
+              <option value="">
+                {agents.status === "loading"
+                  ? "Loading agents…"
+                  : agents.status === "error"
+                    ? "Agents unavailable"
+                    : "Select an agent…"}
+              </option>
+              {agentRows.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.hostname} ({a.agent_code}) — {a.status}
                 </option>
@@ -1295,9 +1313,9 @@ export default function ConfigurationAssessmentPage() {
       </nav>
 
       {tab === "dashboard" && <DashboardTab dashboard={dashboard.data} />}
-      {tab === "inventory" && <InventoryTab data={agents.data} />}
+      {tab === "inventory" && <InventoryTab agents={agents} />}
       {tab === "events" && <EventsTab events={events.data} drifts={drifts.data} />}
-      {tab === "policies" && <PoliciesTab agents={agents.data} />}
+      {tab === "policies" && <PoliciesTab agents={agents} />}
       {tab === "history" && <ScanHistoryTab scans={scans.data} />}
     </div>
   );
